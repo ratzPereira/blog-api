@@ -14,7 +14,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  deleteUser(@Param() id: number): Observable<User> {
+  deleteUser(@Param('id') id: number): Observable<User> {
     return this.userService.deleteOne(id);
   }
 
@@ -24,12 +24,12 @@ export class UserController {
   }
 
   @Get(':id')
-  findOneUser(@Param() id: number): Observable<User> {
+  findOneUser(@Param('id') id: number): Observable<User> {
     return this.userService.findOne(id);
   }
 
   @Put(':id')
-  updateUser(@Param() id: number, @Body() user: User): Observable<User> {
+  updateUser(@Param('id') id: number, @Body() user: User): Observable<User> {
     return this.userService.updateOne(id, user);
   }
 }
