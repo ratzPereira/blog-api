@@ -69,4 +69,39 @@ export class UserService {
 
     return from(this.userRepository.update(id, user));
   }
+
+  login(user: User): Observable<string> {
+    return this.validateUser(user.email, user.password).pipe(
+      switchMap((user: User) => {
+        if (user) {
+          return this.authService
+            .generateJwt(user)
+            .pipe(map((jwt: string) => jwt));
+        } else {
+          return 'Wrong credentials';
+        }
+      }),
+    );
+  }
+
+  validateUser(email: string, password: string): Observable<User> {
+    return this.findByEmail(email).pipe(
+      switchMap((user: User) =>
+        this.authService.comparePassword(password, user.password).pipe(
+          map((passwordMatch: boolean) => {
+            if (passwordMatch) {
+              const { password, ...result } = user;
+              return result;
+            } else {
+              throw Error;
+            }
+          }),
+        ),
+      ),
+    );
+  }
+
+  findByEmail(email: string): Observable<User> {
+    return from(this.userRepository.findOneBy({ email }));
+  }
 }
