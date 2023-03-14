@@ -1,6 +1,9 @@
 import { Controller, Post } from '@nestjs/common';
-import { Body, Delete, Get, Param, Put } from '@nestjs/common/decorators';
+import { Body, Delete, Get, Param, Put, UseGuards } from '@nestjs/common/decorators';
 import { Observable, map, catchError, of, throwError } from 'rxjs';
+import { hasRoles } from 'src/auth/decorator/roles.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { User } from './model/user-interface';
 import { UserService } from './user.service';
 
@@ -33,6 +36,8 @@ export class UserController {
   }
 
   @Get()
+  @hasRoles('Admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   findAllUsers(): Observable<User[]> {
     return this.userService.findAll();
   }
