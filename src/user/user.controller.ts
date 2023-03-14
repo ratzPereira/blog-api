@@ -4,7 +4,7 @@ import { Observable, map, catchError, of, throwError } from 'rxjs';
 import { hasRoles } from 'src/auth/decorator/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { User } from './model/user-interface';
+import { User, UserRole } from './model/user-interface';
 import { UserService } from './user.service';
 
 @Controller('/api/users')
@@ -36,7 +36,7 @@ export class UserController {
   }
 
   @Get()
-  @hasRoles('Admin')
+  @hasRoles(UserRole.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   findAllUsers(): Observable<User[]> {
     return this.userService.findAll();
@@ -50,5 +50,14 @@ export class UserController {
   @Put(':id')
   updateUser(@Param('id') id: number, @Body() user: User): Observable<User> {
     return this.userService.updateOne(id, user);
+  }
+
+
+  @hasRoles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Put(':id/role')
+  updateRoleOfUser(@Param('id') id: number, @Body() user: User): Observable<User>{
+    
+    return this.userService.updateRoleOfUser(Number(id), user);
   }
 }

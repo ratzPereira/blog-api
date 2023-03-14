@@ -22,6 +22,7 @@ export class UserService {
         newUser.email = user.email;
         newUser.password = passwordHash;
         newUser.username = user.username;
+        newUser.role = user.role;
 
         return from(this.userRepository.save(newUser)).pipe(
           map((user: User) => {
@@ -103,5 +104,10 @@ export class UserService {
 
   findByEmail(email: string): Observable<User> {
     return from(this.userRepository.findOneBy({ email }));
+  }
+
+  updateRoleOfUser(id: number, user: User): Observable<any>{
+
+        return from(this.userRepository.update(id,user))
   }
 }
