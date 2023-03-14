@@ -9,7 +9,7 @@ import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
-    forwardRef(()=> UserModule),
+    forwardRef(() => UserModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
