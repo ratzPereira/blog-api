@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { paginate, Pagination } from 'nestjs-typeorm-paginate';
 import { IPaginationOptions } from 'nestjs-typeorm-paginate/dist/interfaces';
-import { from, Observable, switchMap, map, catchError, throwError } from 'rxjs';
+import { catchError, from, map, Observable, switchMap, throwError } from 'rxjs';
 import { AuthService } from 'src/auth/auth.service';
 import { Repository } from 'typeorm';
 import { UserEntity } from './model/user-entity';
@@ -21,9 +21,9 @@ export class UserService {
       switchMap((passwordHash: string) => {
         const newUser = new UserEntity();
         newUser.name = user.name;
+        newUser.username = user.username;
         newUser.email = user.email;
         newUser.password = passwordHash;
-        newUser.username = user.username;
         newUser.role = UserRole.USER;
 
         return from(this.userRepository.save(newUser)).pipe(
@@ -31,13 +31,10 @@ export class UserService {
             const { password, ...result } = user;
             return result;
           }),
-          catchError((err) => {
-            return throwError(err);
-          }),
+          catchError((err) => throwError(err)),
         );
       }),
     );
-    //return from(this.userRepository.save(user));
   }
 
   findOne(id: number): Observable<User> {
@@ -62,16 +59,15 @@ export class UserService {
     );
   }
 
-  paginate(options: IPaginationOptions): Observable<Pagination<User>>{
-
+  paginate(options: IPaginationOptions): Observable<Pagination<User>> {
     return from(paginate<User>(this.userRepository, options)).pipe(
-        map((usersPageable: Pagination<User>) => {
-            usersPageable.items.forEach(function (v) {
-                delete v.password;
-              })
-              return usersPageable;
-        } )
-    )
+      map((usersPageable: Pagination<User>) => {
+        usersPageable.items.forEach(function (v) {
+          delete v.password;
+        });
+        return usersPageable;
+      }),
+    );
   }
 
   deleteOne(id: number): Observable<any> {
@@ -87,6 +83,7 @@ export class UserService {
   }
 
   login(user: User): Observable<string> {
+    console.log(user.password, user.username);
     return this.validateUser(user.email, user.password).pipe(
       switchMap((user: User) => {
         if (user) {
@@ -104,8 +101,8 @@ export class UserService {
     return this.findByEmail(email).pipe(
       switchMap((user: User) =>
         this.authService.comparePassword(password, user.password).pipe(
-          map((passwordMatch: boolean) => {
-            if (passwordMatch) {
+          map((match: boolean) => {
+            if (match) {
               const { password, ...result } = user;
               return result;
             } else {

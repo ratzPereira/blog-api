@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common/decorators';
 import { Pagination } from 'nestjs-typeorm-paginate';
-import { Observable, map, catchError, of, throwError } from 'rxjs';
+import { catchError, map, Observable } from 'rxjs';
 import { hasRoles } from 'src/auth/decorator/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -21,6 +21,7 @@ export class UserController {
 
   @Post()
   createUser(@Body() user: User): Observable<User | Object> {
+    console.log(user.username, user.password);
     return this.userService.create(user).pipe(
       map((user: User) => user),
       catchError((err) => {
